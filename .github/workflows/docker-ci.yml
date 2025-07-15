@@ -1,0 +1,38 @@
+name: CI - Docker Build & Health Check
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Build Docker image
+      run: docker build -t cloudinfra-app .
+
+    - name: Run container
+      run: docker run -d -p 5000:5000 --name app cloudinfra-app
+
+    - name: Wait for Flask to start
+      run: sleep 5
+
+    - name: Check /health endpoint
+      run: curl --fail http://localhost:5000/health
+
+    - name: Stop container
+      run: docker stop app
