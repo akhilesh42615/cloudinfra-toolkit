@@ -1,16 +1,17 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, Response
 from metrics import (
     get_metrics,
     get_disk_usage,
     get_network_stats,
     get_uptime_minutes
 )
+from prometheus_client import generate_latest, CONTENT_TYPE_LATEST
 
 app = Flask(__name__)
 
 @app.route("/metrics")
 def metrics():
-    return jsonify(get_metrics())
+    return Response(generate_latest(), mimetype=CONTENT_TYPE_LATEST)
 
 @app.route("/disk")
 def disk():
